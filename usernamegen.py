@@ -20,7 +20,19 @@ def usernamegen(
     permit_aao: bool
 ) -> Set[str]:
     """
-    Generate usernames based on first names, last names, and prefixes.
+    Generate usernames based on first names, last names, prefixes, and suffixes.
+
+    The generated usernames are the cartesian product of the provided first names and last names (with the specified
+    number of characters extracted from the beginning of each name), prefixes, and suffixes.
+
+    :param first_names: A collection of first names.
+    :param last_names: A collection of last names.
+    :param prefixes: A collection of prefixes.
+    :param suffixes: A collection of suffixes.
+    :param num_first_name_chars: The number of characters to extract from first names.
+    :param num_last_name_chars: The number of characters to extract from last names.
+    :param permit_aao: Whether to permit "åäö" in the usernames.
+    :return: A set of usernames derived from the input parameters.
     """
 
     # If any of the iterables in the call to `itertools.product` are empty, no products will be produced. This is
@@ -43,28 +55,25 @@ def usernamegen(
             first_name_part = first_name_part.translate(translation_table)
             last_name_part = last_name_part.translate(translation_table)
 
-        username = (
-            f'{prefix}'
-            f'{first_name_part}'
-            f'{last_name_part}'
-            # f'{first_name_part.ljust(num_first_name_chars, first_name_part[-1])}'
-            # f'{last_name_part.ljust(num_last_name_chars, last_name_part[-1])}'
-            f'{suffix}'
-        )
-
-        if username:
+        if username := f'{prefix}{first_name_part}{last_name_part}{suffix}':
             user_names.add(username)
 
     return user_names
 
 
+# TODO: Move to some other project in future?
 def make_action_class(collection_name: str) -> Type[Action]:
+    """
+    Create an `argparse.Action` class that stores entries in a certain attribute in the `argparse` namespace.
 
-    action_class = type(
-        f'{collection_name}Action',
-        (Action,),
-        dict()
-    )
+    Supports entries in the form of strings and `argparse.FileType` file wrappers.
+
+    :param collection_name: The name of the attribute in `argparse` namespace that is to store the entries.
+    :return: A dynamically created custom `argparse.Action` class.
+    """
+
+    # NOTE: The name will not be unique.
+    action_class = type(f'{collection_name}Action', (Action,), dict())
 
     def __call__(
         self,
