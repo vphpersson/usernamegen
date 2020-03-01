@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pyutils = {file = "https://github.com/vphpersson/pyutils/tarball/master"}
 
 [dev-packages]
 
